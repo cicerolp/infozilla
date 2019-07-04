@@ -1,0 +1,44 @@
+Steps to reproduce:
+1) create a first baseline named ""3.3.2""
+2) Click finish
+3) Reopen the baseline wizard and remove the 3.3.2 baseline
+4) Try to create a new baseline without clicking finish with the same name.
+4-a) Try to create a new baseline without clicking finish with the same name.
+4 a) Try to create a new baseline without clicking finish with the same name.
+
+!ENTRY org.eclipse.ui 4 0 2008-05-14 14:43:07.515
+!MESSAGE Unhandled event loop exception
+!STACK 0
+java.lang.ClassCastException: org.eclipse.swt.layout.FormData
+	at org.eclipse.swt.layout.FillLayout.computeChildSize(FillLayout.java:141)
+	at org.eclipse.swt.layout.FillLayout.computeSize(FillLayout.java:119)
+	at org.eclipse.swt.widgets.Composite.computeSize(Composite.java:229)
+	at org.eclipse.swt.layout.FillData.computeSize(FillData.java:33)
+
+
+
+In a downstream product we want to use the TestsuiteLocationWizardPage outside of the GRF, that means that we are passing null as the first argument to the constructor of this class (IGenericRecorderWizard).
+An NPE occurs and blocks the whole wizard.
+
+
+More information:
+Here is the proposal patch for this problem:
+
+### Eclipse Workspace Patch 1.0
+#P org.eclipse.hyades.test.ui
+Index: src-recorder/org/eclipse/tptp/test/provisional/recorder/ui/wizards/TestsuiteLocationWizardPage.java
+===================================================================
+RCS file: /cvsroot/tptp/test/org.eclipse.hyades.test.ui/src-recorder/org/eclipse/tptp/test/provisional/recorder/ui/wizards/TestsuiteLocationWizardPage.java,v
+retrieving revision 1.8
+diff -u -r1.8 TestsuiteLocationWizardPage.java
+--- src-recorder/org/eclipse/tptp/test/provisional/recorder/ui/wizards/TestsuiteLocationWizardPage.java	13 Mar 2008 15:32:22 -0000	1.8
++++ src-recorder/org/eclipse/tptp/test/provisional/recorder/ui/wizards/TestsuiteLocationWizardPage.java	23 Apr 2008 08:47:17 -0000
+@@ -45,7 +45,7 @@
+ 	 */
+ 	public TestsuiteLocationWizardPage(IGenericRecorderWizard wizard, boolean bSaveLastSelected)
+ 	{
+-		super(bSaveLastSelected, ((IStructuredSelection)(wizard.getRecorderObjectData(IRecorderPageProvider.WIZARD_KEY_INITIAL_STRUCTURED_SELECTION))));
++		super(bSaveLastSelected, wizard != null ? ((IStructuredSelection)(wizard.getRecorderObjectData(IRecorderPageProvider.WIZARD_KEY_INITIAL_STRUCTURED_SELECTION))) : null);
+ 		this.wizard = wizard;
+ 		setWizard(wizard);
+ 	}
